@@ -1,3 +1,5 @@
+#line 1 "c:\\Dev\\2017\\RebelMakers\\Arduino\\DalekbotSensors\\main.ino"
+#line 1 "c:\\Dev\\2017\\RebelMakers\\Arduino\\DalekbotSensors\\main.ino"
 
 #include "Arduino.h"
 #include <NewPing.h>
@@ -98,6 +100,17 @@ int sensorValues[5];
 
 
 
+#line 101 "c:\\Dev\\2017\\RebelMakers\\Arduino\\DalekbotSensors\\main.ino"
+void getMag();
+#line 181 "c:\\Dev\\2017\\RebelMakers\\Arduino\\DalekbotSensors\\main.ino"
+void setup();
+#line 226 "c:\\Dev\\2017\\RebelMakers\\Arduino\\DalekbotSensors\\main.ino"
+void printValue(int sensorId, int distance);
+#line 235 "c:\\Dev\\2017\\RebelMakers\\Arduino\\DalekbotSensors\\main.ino"
+void PrintAllData();
+#line 248 "c:\\Dev\\2017\\RebelMakers\\Arduino\\DalekbotSensors\\main.ino"
+void loop();
+#line 101 "c:\\Dev\\2017\\RebelMakers\\Arduino\\DalekbotSensors\\main.ino"
 void getMag()
 {
   compass.read();
@@ -271,3 +284,4 @@ void loop()
     // PrintAllData();
   }
 }
+
