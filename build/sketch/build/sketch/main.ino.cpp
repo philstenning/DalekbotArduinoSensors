@@ -201,15 +201,8 @@ void setup()
   // compass.m_max = (LSM303::vector<int16_t>){+706, +439, +662};
   // compass.m_min = (LSM303::vector<int16_t>){-304, -736, -528};
   // compass.m_max = (LSM303::vector<int16_t>){+513, +402, +570};
-
-
-  // use these on the adafruit board
-  // compass.m_min = (LSM303::vector<int16_t>){-627, -694, -536};
-  // compass.m_max = (LSM303::vector<int16_t>){+472, +356, +141};
-
- // min: {  -673,   -613,   -754}    max: {  +407,   +491,   +323}
-  compass.m_min = (LSM303::vector<int16_t>){-673, -613, -754};
-  compass.m_max = (LSM303::vector<int16_t>){+407, +491, +323};
+  compass.m_min = (LSM303::vector<int16_t>){-627, -694, -536};
+  compass.m_max = (LSM303::vector<int16_t>){+472, +356, +141};
 
   // min: {  -304,   -862,   -541}    max: {  +513,   +402,   +570
    //min: {  -304,   -736,   -528}    max: {  +562,   +499,   +498
@@ -275,13 +268,9 @@ void loop()
         //set values
         sensorValues[i] = tempval;
       }
-      // sensor out of range so set to maximum
-      if ( tempval == 0){
-        sensorValues[i] = 254;
-      }
     }
     getMag();
-     PrintAllData();
+    // PrintAllData();
   }
 }
 
