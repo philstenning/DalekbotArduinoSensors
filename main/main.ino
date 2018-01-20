@@ -7,6 +7,8 @@
 
 LSM303 compass;
 
+
+
 volatile boolean process_it;
 volatile byte slaveValueReceived, slaveValueSent;
 int jj = 0;
