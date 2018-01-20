@@ -3,8 +3,8 @@
         {
             "name": "Win32",
             "includePath": [
-                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\cores\\arduino",
-                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\SPI\\src" 
+                "C:\\Documents\\! - Synced Docs\\OneDrive\\! - RaspberryPi\\Git Repositorys\\DalekbotArduinoSensors\\build\\libraries",
+                "C:\\Documents\\! - Synced Docs\\OneDrive\\! - RaspberryPi\\Git Repositorys\\DalekbotArduinoSensors\\build\\libraries\\SPI\\src" 
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": false,
