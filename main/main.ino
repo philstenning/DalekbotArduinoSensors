@@ -10,6 +10,7 @@ LSM303 compass;
 volatile boolean process_it;
 volatile byte slaveValueReceived, slaveValueSent;
 int jj = 0;
+int heartbeat = 0;
 
 volatile int a = 400;
 int b = 450;
@@ -25,7 +26,6 @@ volatile int currentDevice=0;
 // byte[3] = the last 3 bits.
 
 //#####End  SPI Settings
-
 
 ////////////////////////////////////////////////
 // Each time a request is made from the master device
@@ -219,6 +219,7 @@ void setup()
 
 
   Serial.println("Ready!");
+  pinMode(LED_BUILTIN, OUTPUT);
 }
 
 void printValue(int sensorId, int distance)
@@ -266,6 +267,28 @@ void loop()
       }
     }
     getMag();
-    // PrintAllData();
+    PrintAllData();
+
   }
+//    if (heartbeat == 0)
+//      {
+//      digitalWrite(LED_BUILTIN, HIGH);
+//      heartbeat = 1;
+//      Serial.print("Heatbeat A : ");
+//      Serial.print(heartbeat);
+//      Serial.print(" \n");
+//      }
+//   else
+//      {
+//      digitalWrite(LED_BUILTIN, LOW);
+//      heartbeat = heartbeat = 0;
+//      Serial.print("Heatbeat B : ");
+//      Serial.print(heartbeat);
+//      Serial.print(" \n");
+//      }
+//   Serial.print("Heatbeat : ");
+//   Serial.print(heartbeat);
+//   Serial.print(" \n");
+
+
 }
