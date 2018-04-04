@@ -232,7 +232,9 @@ void printValue(int sensorId, int distance)
 }
 
 void PrintAllData()
-{
+{ 
+
+  
   int asize =sizeof(sensorValues) ;
   for (int i = 0; i < 5 ; i++)
   {
@@ -250,6 +252,7 @@ void loop()
 
   if (currentMillis - previousMillis >= interval)
   {
+    Serial.print("loop");
     previousMillis = currentMillis;
 
     for (int i = 0; i < NUMBER_OF_SENSORS; i++)
@@ -261,12 +264,12 @@ void loop()
       if (tempval != sensorValues[i])
       {
         //print values to serial
-       // printValue(i, tempval);
+      //  printValue(i, tempval);
         //set values
         sensorValues[i] = tempval;
       }
     }
-    getMag();
+    // getMag();
     PrintAllData();
 
   }

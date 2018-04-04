@@ -21,7 +21,3 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
-.vscode/
-/.vscode/ 
-/vscode/
-vscode/
