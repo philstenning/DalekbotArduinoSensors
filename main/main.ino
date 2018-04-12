@@ -1,4 +1,3 @@
-
 #include "Arduino.h"
 #include <NewPing.h>
 #include <Wire.h>
@@ -22,7 +21,7 @@ volatile int currentDevice=0;
 
 // byte[0] = this is 0 as it was set from previous packet.
 // byte[1] = the selected sensor number
-// bute[2] = the bit shifted number first 3 bits
+// byte[2] = the bit shifted number first 3 bits
 // byte[3] = the last 3 bits.
 
 //#####End  SPI Settings
@@ -73,7 +72,7 @@ NewPing sonar4(TRIGGER_PIN_S4, ECHO_PIN_S4, MAX_DISTANCE);
 // if you change the sonars array change
 // this number as well..
 // remember it is a zero based array
-const int NUMBER_OF_SENSORS = 4;
+const int NUMBER_OF_SENSORS = 3;
 
 // create an array of sonar sensors
 NewPing sonars[NUMBER_OF_SENSORS] = {
@@ -252,7 +251,6 @@ void loop()
 
   if (currentMillis - previousMillis >= interval)
   {
-    Serial.print("loop");
     previousMillis = currentMillis;
 
     for (int i = 0; i < NUMBER_OF_SENSORS; i++)
@@ -269,29 +267,9 @@ void loop()
         sensorValues[i] = tempval;
       }
     }
-    // getMag();
+    getMag();
     PrintAllData();
 
   }
-//    if (heartbeat == 0)
-//      {
-//      digitalWrite(LED_BUILTIN, HIGH);
-//      heartbeat = 1;
-//      Serial.print("Heatbeat A : ");
-//      Serial.print(heartbeat);
-//      Serial.print(" \n");
-//      }
-//   else
-//      {
-//      digitalWrite(LED_BUILTIN, LOW);
-//      heartbeat = heartbeat = 0;
-//      Serial.print("Heatbeat B : ");
-//      Serial.print(heartbeat);
-//      Serial.print(" \n");
-//      }
-//   Serial.print("Heatbeat : ");
-//   Serial.print(heartbeat);
-//   Serial.print(" \n");
-
 
 }
