@@ -14,10 +14,10 @@ int heartbeat = 0;
 volatile int a = 400;
 int b = 450;
 int c = 200;
-volatile int currentDevice=0;
+volatile int currentDevice = 0;
 // we receive 4 bytes from the master.
 // the returned data should be as follows.
-// we need to return a 16 bit number so will have to bit shift it 
+// we need to return a 16 bit number so will have to bit shift it
 
 // byte[0] = this is 0 as it was set from previous packet.
 // byte[1] = the selected sensor number
@@ -36,7 +36,7 @@ volatile int currentDevice=0;
 // the i2cMode
 ///////////////////////////////////////////////
 unsigned long previousMillis = 0; // will store last time for loop
-const long interval = 100;        // time  of loop
+volatile long interval = 80;        // time  of loop
 
 // the i2c addess used by both the master and slave device
 #define SLAVE_ADDRESS 0x05
@@ -78,8 +78,7 @@ const int NUMBER_OF_SENSORS = 3;
 NewPing sonars[NUMBER_OF_SENSORS] = {
     sonar1,
     sonar2,
-    sonar3,
-    sonar4};
+    sonar3};
 
 //not used now
 //int returnValueForI2c = 0;
@@ -87,13 +86,19 @@ NewPing sonars[NUMBER_OF_SENSORS] = {
 // i2cMode is set by the master device
 int i2cMode = 1; // ALL = 1, ULTRASONIC = 2
 
+// deviceMode is for speeding up reading of the device
+// if we only need one sensor then we can only read that one
+//mode 10: all data is read
+//mode 11: left ping only
+//mode 12: right ping only
+//mode 13: center ping only
+//mode 14: compass only
+volatile int deviceMode = 0;
+
 //initialise the sensors values
 //int sensorValues[4]={3,7,13,27};
 // fifth one is Mag
 int sensorValues[5];
-
-
-
 
 void getMag()
 {
@@ -103,95 +108,111 @@ void getMag()
 
   if (heading <= 360)
   {
-    sensorValues[4]  =int(heading);
-    // if (sensorValues[4]+ 20) 
-
+    sensorValues[4] = int(heading);
+    // if (sensorValues[4]+ 20)
   }
 }
 
-
 ISR(SPI_STC_vect)
 {
-  
+
   slaveValueReceived = SPDR;
-  switch(SPDR){
-    case 0:
-    //Serial.print("Current device: 0");  
+  switch (SPDR)
+  {
+  case 0:
+    //Serial.print("Current device: 0");
     currentDevice = SPDR;
 
     break;
-    case 1:
-    //Serial.print("Current device: 1");  
-    currentDevice = SPDR;
-
-
-    break;
-    case 2:
-   // Serial.print("Current device: 2");  
+  case 1:
+    //Serial.print("Current device: 1");
     currentDevice = SPDR;
 
     break;
-    case 3:
-    //Serial.print("Current device: 3");  
+  case 2:
+    // Serial.print("Current device: 2");
     currentDevice = SPDR;
-    
+
+    break;
+  case 3:
+    //Serial.print("Current device: 3");
+    currentDevice = SPDR;
+    break;
+
+  case 4:
+    // Serial.print("Current device: 4");
+    currentDevice = SPDR;
+    break;
+
+  case 5:
+    // Serial.print("Current device: 5");
+    currentDevice = SPDR;
+    break;
+
+  case 10:
+    deviceMode == 10;
+    interval = 80;
+    break;
+  case 11:
+    deviceMode == 11;
+    interval = 20;
+    break;
+  case 12:
+    deviceMode == 12;
+    interval = 20;
+    break;
+  case 13:
+    deviceMode == 13;
+    interval = 20;
+    break;
+  case 14:
+    deviceMode == 15;
+    interval = 20;
+    break;
+  case 15:
+    deviceMode == 15;
+    interval = 80;
+    break;
    
+
+  // send back the high bits
+  case 200:
+    SPDR = sensorValues[currentDevice] >> 8;
+
     break;
 
-    case 4:
-   // Serial.print("Current device: 4");  
-    currentDevice = SPDR;
+  // send back the low bits
+  case 201:
+    SPDR = sensorValues[currentDevice] & 0xff;
     break;
 
-    case 5:
-   // Serial.print("Current device: 5");  
-    currentDevice = SPDR;
-    break;
-
-
-    // send back the high bits
-    case 200:
-    SPDR = sensorValues[currentDevice]   >> 8;
-    
-    break;
-
-    // send back the low bits
-    case 201:
-    SPDR = sensorValues[currentDevice]  & 0xff;
-    break;
-
-
-    case 255: // end of bytes sent in packet.
+  case 255: // end of bytes sent in packet.
     //Serial.print("\n ");
-    SPDR =0;
+    SPDR = 0;
     break;
 
-    default:
+  default:
     Serial.print("    err: ");
     Serial.print(SPDR);
   }
 }
 
-
-
-
 void setup()
 {
   Serial.begin(115200); // start serial for output
- 
+
   Wire.begin();
   compass.init();
   compass.enableDefault();
-  
 
-    /*
+  /*
   https://github.com/pololu/lsm303-arduino
   Calibration values; the default values of +/-32767 for each axis
   lead to an assumed magnetometer bias of 0. Use the Calibrate example
   program to determine appropriate values for your particular unit.
   */
-  // compass.m_min = (LSM303::vector<int16_t>){-334, -717, -584}; 
-  // compass.m_max = (LSM303::vector<int16_t>){+556, +211, +344}; 
+  // compass.m_min = (LSM303::vector<int16_t>){-334, -717, -584};
+  // compass.m_max = (LSM303::vector<int16_t>){+556, +211, +344};
   // compass.m_min = (LSM303::vector<int16_t>){-639, -1047, -559};
   // compass.m_max = (LSM303::vector<int16_t>){+706, +439, +662};
   // compass.m_min = (LSM303::vector<int16_t>){-304, -736, -528};
@@ -200,9 +221,8 @@ void setup()
   compass.m_max = (LSM303::vector<int16_t>){+472, +356, +141};
 
   // min: {  -304,   -862,   -541}    max: {  +513,   +402,   +570
-   //min: {  -304,   -736,   -528}    max: {  +562,   +499,   +498
+  //min: {  -304,   -736,   -528}    max: {  +562,   +499,   +498
   // min: {  -639,  -1047,   -559}    max: {  +706,   +439,   +662}
-     
 
   // min: {  -308,   -548,   -536}    max: {  +347,   +102,   -405}
   // min: {  -627,   -694,   -536}    max: {  +472,   +356,   -141}
@@ -215,7 +235,6 @@ void setup()
   process_it = false;
   // now turn on the interrupts
   SPI.attachInterrupt();
-
 
   Serial.println("Ready!");
   pinMode(LED_BUILTIN, OUTPUT);
@@ -231,11 +250,10 @@ void printValue(int sensorId, int distance)
 }
 
 void PrintAllData()
-{ 
+{
 
-  
-  int asize =sizeof(sensorValues) ;
-  for (int i = 0; i < 5 ; i++)
+  int asize = sizeof(sensorValues);
+  for (int i = 0; i < 5; i++)
   {
     Serial.print(i);
     Serial.print(":");
@@ -243,6 +261,25 @@ void PrintAllData()
     Serial.print(" ");
   }
   Serial.print(" \n");
+}
+
+void getAllData()
+{
+  for (int i = 0; i < NUMBER_OF_SENSORS; i++)
+  {
+
+    int tempval = sonars[i].ping_cm();
+
+    //only change value if it has changed.
+    if (tempval != sensorValues[i])
+    {
+      //print values to serial
+      //  printValue(i, tempval);
+      //set values
+      sensorValues[i] = tempval;
+    }
+  }
+  getMag();
 }
 
 void loop()
@@ -253,23 +290,35 @@ void loop()
   {
     previousMillis = currentMillis;
 
-    for (int i = 0; i < NUMBER_OF_SENSORS; i++)
+    switch (deviceMode)
     {
-       
-      int tempval = sonars[i].ping_cm();
-
-      //only change value if it has changed.
-      if (tempval != sensorValues[i])
-      {
-        //print values to serial
-      //  printValue(i, tempval);
-        //set values
-        sensorValues[i] = tempval;
-      }
+    case 10:
+      // get all sensor values
+      getAllData();
+      break;
+    case 11:
+      // leftPing only
+      sensorValues[0] =sonars[0].ping_cm();
+      break;
+    case 12:
+      //rightPing only
+      sensorValues[1] =sonars[1].ping_cm();
+      break;
+    case 13:
+      // centerPing only
+      sensorValues[2] =sonars[2].ping_cm();
+      break;
+    case 14:
+      // compass only
+      getMag();
+    case 15:
+      // all data is read and debug output
+      getAllData();
+      PrintAllData();
+      break;
+    default:
+      Serial.print("    err: loop deviceMode not set");
+      
     }
-    getMag();
-    PrintAllData();
-
   }
-
 }
