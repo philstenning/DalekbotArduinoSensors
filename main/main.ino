@@ -1,3 +1,4 @@
+
 #include "Arduino.h"
 #include <NewPing.h>
 #include <Wire.h>
@@ -236,7 +237,7 @@ void PrintAllData()
     Serial.print(i);
     Serial.print(":");
     Serial.print(sensorValues[i]);
-    Serial.print(" ");
+    Serial.print("\t\t");
   }
   Serial.print(" \n");
 }
@@ -263,11 +264,12 @@ void loop()
         sensorValues[i] = tempval;
       }
     }
-    getMag();
+    //getMag();
     PrintAllData();
     Serial.print(" working...");
 
   }
+// Start of Rem
 //    if (heartbeat == 0)
 //      {
 //      digitalWrite(LED_BUILTIN, HIGH);
@@ -287,6 +289,6 @@ void loop()
 //   Serial.print("Heatbeat : ");
 //   Serial.print(heartbeat);
 //   Serial.print(" \n");
-
+// End of Rem
 
 }
