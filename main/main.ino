@@ -260,7 +260,7 @@ void PrintAllData()
     Serial.print(i);
     Serial.print(":");
     Serial.print(sensorValues[i]);
-    Serial.print(" ");
+    Serial.print("\t\t");
   }
   Serial.print(" \n");
 }
@@ -322,9 +322,31 @@ void loop()
       Serial.print("    err: loop deviceMode not set");
       
     }
-    // getMag();
+    //getMag();
     PrintAllData();
     Serial.print(" working...");
 
   }
+// Start of Rem
+//    if (heartbeat == 0)
+//      {
+//      digitalWrite(LED_BUILTIN, HIGH);
+//      heartbeat = 1;
+//      Serial.print("Heatbeat A : ");
+//      Serial.print(heartbeat);
+//      Serial.print(" \n");
+//      }
+//   else
+//      {
+//      digitalWrite(LED_BUILTIN, LOW);
+//      heartbeat = heartbeat = 0;
+//      Serial.print("Heatbeat B : ");
+//      Serial.print(heartbeat);
+//      Serial.print(" \n");
+//      }
+//   Serial.print("Heatbeat : ");
+//   Serial.print(heartbeat);
+//   Serial.print(" \n");
+// End of Rem
+
 }
