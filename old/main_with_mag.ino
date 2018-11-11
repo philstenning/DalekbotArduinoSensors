@@ -2,6 +2,9 @@
 #include <NewPing.h>
 #include <Wire.h>
 #include <SPI.h>
+// #include <LSM303.h>
+
+// LSM303 compass;
 
 volatile boolean process_it;
 volatile byte slaveValueReceived, slaveValueSent;
@@ -33,7 +36,7 @@ volatile int currentDevice = 0;
 // the i2cMode
 ///////////////////////////////////////////////
 unsigned long previousMillis = 0; // will store last time for loop
-volatile long interval = 80;      // time  of loop
+volatile long interval = 80;        // time  of loop
 
 // the i2c addess used by both the master and slave device
 #define SLAVE_ADDRESS 0x05
@@ -69,15 +72,14 @@ NewPing sonar4(TRIGGER_PIN_S4, ECHO_PIN_S4, MAX_DISTANCE);
 // if you change the sonars array change
 // this number as well..
 // remember it is a zero based array
-const int NUMBER_OF_SENSORS = 4;
+const int NUMBER_OF_SENSORS = 3;
 
 // create an array of sonar sensors
 NewPing sonars[NUMBER_OF_SENSORS] = {
     sonar1,
     sonar2,
     sonar3,
-    sonar4
-    };
+    sonar4};
 
 //not used now
 //int returnValueForI2c = 0;
@@ -91,12 +93,26 @@ int i2cMode = 1; // ALL = 1, ULTRASONIC = 2
 //mode 11: left ping only
 //mode 12: right ping only
 //mode 13: center ping only
-//mode 15: all data and Print it to debug.
-volatile int deviceMode = 15;
+//mode 14: compass only
+volatile int deviceMode = 10;
 
 //initialise the sensors values
 //int sensorValues[4]={3,7,13,27};
-int sensorValues[3];
+// fifth one is Mag
+int sensorValues[5];
+
+// void getMag()
+// {
+//   compass.read();
+//   float heading = compass.heading();
+//   // Serial.println(heading);
+
+//   if (heading <= 360)
+//   {
+//     sensorValues[4] = int(heading);
+//     // if (sensorValues[4]+ 20)
+//   }
+// }
 
 ISR(SPI_STC_vect)
 {
@@ -151,13 +167,14 @@ ISR(SPI_STC_vect)
     interval = 20;
     break;
   case 14:
-    // not used anymore. left for legacy support
-    Serial.println("err: 14 is not in use anymore");
+    deviceMode == 15;
+    interval = 20;
     break;
   case 15:
     deviceMode == 15;
     interval = 80;
     break;
+   
 
   // send back the high bits
   case 200:
@@ -186,14 +203,39 @@ void setup()
   Serial.begin(115200); // start serial for output
 
   Wire.begin();
+  // compass.init();
+  // compass.enableDefault();
 
-  // Spi setup
+  /*
+  https://github.com/pololu/lsm303-arduino
+  Calibration values; the default values of +/-32767 for each axis
+  lead to an assumed magnetometer bias of 0. Use the Calibrate example
+  program to determine appropriate values for your particular unit.
+  */
+  // compass.m_min = (LSM303::vector<int16_t>){-334, -717, -584};
+  // compass.m_max = (LSM303::vector<int16_t>){+556, +211, +344};
+  // compass.m_min = (LSM303::vector<int16_t>){-639, -1047, -559};
+  // compass.m_max = (LSM303::vector<int16_t>){+706, +439, +662};
+  // compass.m_min = (LSM303::vector<int16_t>){-304, -736, -528};
+  // compass.m_max = (LSM303::vector<int16_t>){+513, +402, +570};
+  
+  // compass.m_min = (LSM303::vector<int16_t>){-627, -694, -536};
+  // compass.m_max = (LSM303::vector<int16_t>){+472, +356, +141};
+
+  // min: {  -304,   -862,   -541}    max: {  +513,   +402,   +570
+  //min: {  -304,   -736,   -528}    max: {  +562,   +499,   +498
+  // min: {  -639,  -1047,   -559}    max: {  +706,   +439,   +662}
+
+  // min: {  -308,   -548,   -536}    max: {  +347,   +102,   -405}
+  // min: {  -627,   -694,   -536}    max: {  +472,   +356,   -141}
+
+  // //Spi setup
   pinMode(MISO, OUTPUT);
-  //  turn on SPI in slave mode.
+  // // turn on SPI in slave mode.
   SPCR |= _BV(SPE);
-  //  get ready for an interrupt
+  // // get ready for an interrupt
   process_it = false;
-  //  now turn on the interrupts
+  // // now turn on the interrupts
   SPI.attachInterrupt();
 
   Serial.println("Ready!");
@@ -213,13 +255,12 @@ void PrintAllData()
 {
 
   int asize = sizeof(sensorValues);
-  for (int i = 0; i < NUMBER_OF_SENSORS; i++)
+  for (int i = 0; i < 5; i++)
   {
     Serial.print(" ");
     Serial.print(i);
     Serial.print(":");
-    Serial.print(sensorValues[i]);
-    Serial.print("\t\t");
+    Serial.println(sensorValues[i]);
   }
   Serial.print(" \n");
 }
@@ -228,7 +269,9 @@ void getAllData()
 {
   for (int i = 0; i < NUMBER_OF_SENSORS; i++)
   {
+
     int tempval = sonars[i].ping_cm();
+
     //only change value if it has changed.
     if (tempval != sensorValues[i])
     {
@@ -257,16 +300,19 @@ void loop()
       break;
     case 11:
       // leftPing only
-      sensorValues[0] = sonars[0].ping_cm();
+      sensorValues[0] =sonars[0].ping_cm();
       break;
     case 12:
       //rightPing only
-      sensorValues[1] = sonars[1].ping_cm();
+      sensorValues[1] =sonars[1].ping_cm();
       break;
     case 13:
       // centerPing only
-      sensorValues[2] = sonars[2].ping_cm();
+      sensorValues[2] =sonars[2].ping_cm();
       break;
+    // case 14:
+      // compass only
+      // getMag();
     case 15:
       // all data is read and debug output
       getAllData();
@@ -274,7 +320,33 @@ void loop()
       break;
     default:
       Serial.print("    err: loop deviceMode not set");
+      
     }
+    //getMag();
+    PrintAllData();
     Serial.print(" working...");
+
   }
+// Start of Rem
+//    if (heartbeat == 0)
+//      {
+//      digitalWrite(LED_BUILTIN, HIGH);
+//      heartbeat = 1;
+//      Serial.print("Heatbeat A : ");
+//      Serial.print(heartbeat);
+//      Serial.print(" \n");
+//      }
+//   else
+//      {
+//      digitalWrite(LED_BUILTIN, LOW);
+//      heartbeat = heartbeat = 0;
+//      Serial.print("Heatbeat B : ");
+//      Serial.print(heartbeat);
+//      Serial.print(" \n");
+//      }
+//   Serial.print("Heatbeat : ");
+//   Serial.print(heartbeat);
+//   Serial.print(" \n");
+// End of Rem
+
 }
