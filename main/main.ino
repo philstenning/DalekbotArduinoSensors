@@ -2,9 +2,9 @@
 #include <NewPing.h>
 #include <Wire.h>
 #include <SPI.h>
-#include <LSM303.h>
+// #include <LSM303.h>
 
-LSM303 compass;
+// LSM303 compass;
 
 volatile boolean process_it;
 volatile byte slaveValueReceived, slaveValueSent;
@@ -93,25 +93,25 @@ int i2cMode = 1; // ALL = 1, ULTRASONIC = 2
 //mode 12: right ping only
 //mode 13: center ping only
 //mode 14: compass only
-volatile int deviceMode = 0;
+volatile int deviceMode = 10;
 
 //initialise the sensors values
 //int sensorValues[4]={3,7,13,27};
 // fifth one is Mag
 int sensorValues[5];
 
-void getMag()
-{
-  compass.read();
-  float heading = compass.heading();
-  Serial.println(heading);
+// void getMag()
+// {
+//   compass.read();
+//   float heading = compass.heading();
+//   // Serial.println(heading);
 
-  if (heading <= 360)
-  {
-    sensorValues[4] = int(heading);
-    // if (sensorValues[4]+ 20)
-  }
-}
+//   if (heading <= 360)
+//   {
+//     sensorValues[4] = int(heading);
+//     // if (sensorValues[4]+ 20)
+//   }
+// }
 
 ISR(SPI_STC_vect)
 {
@@ -202,8 +202,8 @@ void setup()
   Serial.begin(115200); // start serial for output
 
   Wire.begin();
-  compass.init();
-  compass.enableDefault();
+  // compass.init();
+  // compass.enableDefault();
 
   /*
   https://github.com/pololu/lsm303-arduino
@@ -217,8 +217,9 @@ void setup()
   // compass.m_max = (LSM303::vector<int16_t>){+706, +439, +662};
   // compass.m_min = (LSM303::vector<int16_t>){-304, -736, -528};
   // compass.m_max = (LSM303::vector<int16_t>){+513, +402, +570};
-  compass.m_min = (LSM303::vector<int16_t>){-627, -694, -536};
-  compass.m_max = (LSM303::vector<int16_t>){+472, +356, +141};
+  
+  // compass.m_min = (LSM303::vector<int16_t>){-627, -694, -536};
+  // compass.m_max = (LSM303::vector<int16_t>){+472, +356, +141};
 
   // min: {  -304,   -862,   -541}    max: {  +513,   +402,   +570
   //min: {  -304,   -736,   -528}    max: {  +562,   +499,   +498
@@ -227,13 +228,13 @@ void setup()
   // min: {  -308,   -548,   -536}    max: {  +347,   +102,   -405}
   // min: {  -627,   -694,   -536}    max: {  +472,   +356,   -141}
 
-  //Spi setup
+  // //Spi setup
   pinMode(MISO, OUTPUT);
-  // turn on SPI in slave mode.
+  // // turn on SPI in slave mode.
   SPCR |= _BV(SPE);
-  // get ready for an interrupt
+  // // get ready for an interrupt
   process_it = false;
-  // now turn on the interrupts
+  // // now turn on the interrupts
   SPI.attachInterrupt();
 
   Serial.println("Ready!");
@@ -255,6 +256,7 @@ void PrintAllData()
   int asize = sizeof(sensorValues);
   for (int i = 0; i < 5; i++)
   {
+    Serial.print(" ");
     Serial.print(i);
     Serial.print(":");
     Serial.print(sensorValues[i]);
@@ -279,7 +281,7 @@ void getAllData()
       sensorValues[i] = tempval;
     }
   }
-  getMag();
+  // getMag();
 }
 
 void loop()
@@ -308,9 +310,9 @@ void loop()
       // centerPing only
       sensorValues[2] =sonars[2].ping_cm();
       break;
-    case 14:
+    // case 14:
       // compass only
-      getMag();
+      // getMag();
     case 15:
       // all data is read and debug output
       getAllData();
@@ -320,5 +322,9 @@ void loop()
       Serial.print("    err: loop deviceMode not set");
       
     }
+    // getMag();
+    PrintAllData();
+    Serial.print(" working...");
+
   }
 }

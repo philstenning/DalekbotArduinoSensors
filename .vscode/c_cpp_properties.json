@@ -10,8 +10,8 @@
                 "C:\\Users\\phils\\Documents\\Arduino\\libraries\\FastLED",
                 "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\SPI\\src",
                 "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\cores\\arduino",
-                "C:\\Program Files (x86)\\Arduino\\hardware\\tools\\avr\\include"
-
+                "C:\\Program Files (x86)\\Arduino\\hardware\\tools\\avr\\include",
+                "G:\\OneDrive\\Documents\\Arduino\\libraries"
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": false,
@@ -28,5 +28,5 @@
             "cppStandard": "c++17"
         }
     ],
-    "version": 3
+    "version": 4
 }
