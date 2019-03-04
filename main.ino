@@ -1,17 +1,13 @@
 #include "Arduino.h"
 #include <NewPing.h>
-#include <Wire.h>
 #include <SPI.h>
 
-volatile boolean process_it;
-volatile byte slaveValueReceived, slaveValueSent;
-// int jj = 0;
-// int heartbeat = 0;
+volatile byte slaveValueReceived;
 
-// volatile int a = 400;
-// int b = 450;
-// int c = 200;
+// currentDevice is set from the Spi bus,
+// once set, that device's data is sent back over the bus
 volatile int currentDevice = 0;
+
 // we receive 4 bytes from the master.
 // the returned data should be as follows.
 // we need to return a 16 bit number so will have to bit shift it
@@ -21,22 +17,8 @@ volatile int currentDevice = 0;
 // byte[2] = the bit shifted number first 3 bits
 // byte[3] = the last 3 bits.
 
-//#####End  SPI Settings
-
-////////////////////////////////////////////////
-// Each time a request is made from the master device
-// a value from the sensorValue array is returned.
-// The sensorValue array is looped through and
-// depending on the i2cMode, a different ranges of
-// values are returned.
-// When a value is received from the master device it changes
-// the i2cMode
-///////////////////////////////////////////////
 unsigned long previousMillis = 0; // will store last time for loop
-volatile long interval = 80;      // time  of loop
-
-// the i2c addess used by both the master and slave device
-#define SLAVE_ADDRESS 0x05
+volatile long interval = 20;      // time  of loop
 
 // sensor board pinout
 // sensor : trigger : Echo
@@ -58,7 +40,7 @@ volatile long interval = 80;      // time  of loop
 #define TRIGGER_PIN_S4 9
 #define ECHO_PIN_S4 4
 
-#define MAX_DISTANCE 200 // max distance in cm. same for all
+#define MAX_DISTANCE 100 // max distance in cm. same for all
 
 //initialise the sensors
 NewPing sonar1(TRIGGER_PIN_S1, ECHO_PIN_S1, MAX_DISTANCE);
@@ -77,12 +59,6 @@ NewPing sonars[NUMBER_OF_SENSORS] = {
     sonar3,
     sonar4};
 
-//not used now
-//int returnValueForI2c = 0;
-
-// i2cMode is set by the master device
-int i2cMode = 1; // ALL = 1, ULTRASONIC = 2
-
 // deviceMode is for speeding up reading of the device
 // if we only need one sensor then we can only read that one
 //mode 10: all data is read
@@ -91,7 +67,7 @@ int i2cMode = 1; // ALL = 1, ULTRASONIC = 2
 //mode 13: center ping only
 //mode 14: compass only
 // mode 15: all data is read and debug output
-volatile int deviceMode = 15;
+volatile int deviceMode = 10;
 
 //initialise the sensors values
 //int sensorValues[4]={3,7,13,27};
@@ -183,14 +159,12 @@ void setup()
 {
   Serial.begin(115200); // start serial for output
 
-  Wire.begin();
+  // Wire.begin();
 
   //Spi setup
   pinMode(MISO, OUTPUT);
   // turn on SPI in slave mode.
   SPCR |= _BV(SPE);
-  // get ready for an interrupt
-  process_it = false;
   // now turn on the interrupts
   SPI.attachInterrupt();
 
