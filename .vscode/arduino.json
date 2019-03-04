@@ -1,7 +1,7 @@
 {
     "board": "arduino:avr:pro",
     "configuration": "cpu=8MHzatmega328",
-    "output": "../build",
-    "sketch": "main\\main.ino",
+    "output": "./build",
+    "sketch": "main.ino",
     "port": "COM5"
 }

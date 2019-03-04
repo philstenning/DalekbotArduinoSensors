@@ -5,12 +5,12 @@
 
 volatile boolean process_it;
 volatile byte slaveValueReceived, slaveValueSent;
-int jj = 0;
-int heartbeat = 0;
+// int jj = 0;
+// int heartbeat = 0;
 
-volatile int a = 400;
-int b = 450;
-int c = 200;
+// volatile int a = 400;
+// int b = 450;
+// int c = 200;
 volatile int currentDevice = 0;
 // we receive 4 bytes from the master.
 // the returned data should be as follows.
@@ -68,7 +68,6 @@ NewPing sonar4(TRIGGER_PIN_S4, ECHO_PIN_S4, MAX_DISTANCE);
 
 // if you change the sonars array change
 // this number as well..
-// remember it is a zero based array
 const int NUMBER_OF_SENSORS = 4;
 
 // create an array of sonar sensors
@@ -76,8 +75,7 @@ NewPing sonars[NUMBER_OF_SENSORS] = {
     sonar1,
     sonar2,
     sonar3,
-    sonar4
-    };
+    sonar4};
 
 //not used now
 //int returnValueForI2c = 0;
@@ -91,16 +89,16 @@ int i2cMode = 1; // ALL = 1, ULTRASONIC = 2
 //mode 11: left ping only
 //mode 12: right ping only
 //mode 13: center ping only
-//mode 15: all data and Print it to debug.
+//mode 14: compass only
+// mode 15: all data is read and debug output
 volatile int deviceMode = 15;
 
 //initialise the sensors values
 //int sensorValues[4]={3,7,13,27};
-int sensorValues[3];
+int sensorValues[4] = {0, 0, 0, 0};
 
 ISR(SPI_STC_vect)
 {
-
   slaveValueReceived = SPDR;
   switch (SPDR)
   {
@@ -151,8 +149,8 @@ ISR(SPI_STC_vect)
     interval = 20;
     break;
   case 14:
-    // not used anymore. left for legacy support
-    Serial.println("err: 14 is not in use anymore");
+    deviceMode == 15;
+    interval = 20;
     break;
   case 15:
     deviceMode == 15;
@@ -187,13 +185,13 @@ void setup()
 
   Wire.begin();
 
-  // Spi setup
+  //Spi setup
   pinMode(MISO, OUTPUT);
-  //  turn on SPI in slave mode.
+  // turn on SPI in slave mode.
   SPCR |= _BV(SPE);
-  //  get ready for an interrupt
+  // get ready for an interrupt
   process_it = false;
-  //  now turn on the interrupts
+  // now turn on the interrupts
   SPI.attachInterrupt();
 
   Serial.println("Ready!");
@@ -219,7 +217,6 @@ void PrintAllData()
     Serial.print(i);
     Serial.print(":");
     Serial.print(sensorValues[i]);
-    Serial.print("\t\t");
   }
   Serial.print(" \n");
 }
@@ -228,17 +225,16 @@ void getAllData()
 {
   for (int i = 0; i < NUMBER_OF_SENSORS; i++)
   {
+
     int tempval = sonars[i].ping_cm();
+
     //only change value if it has changed.
     if (tempval != sensorValues[i])
     {
-      //print values to serial
-      //  printValue(i, tempval);
       //set values
       sensorValues[i] = tempval;
     }
   }
-  // getMag();
 }
 
 void loop()
@@ -267,6 +263,9 @@ void loop()
       // centerPing only
       sensorValues[2] = sonars[2].ping_cm();
       break;
+    // case 14:
+    // compass only
+    // getMag();
     case 15:
       // all data is read and debug output
       getAllData();
@@ -275,6 +274,5 @@ void loop()
     default:
       Serial.print("    err: loop deviceMode not set");
     }
-    Serial.print(" working...");
   }
 }
